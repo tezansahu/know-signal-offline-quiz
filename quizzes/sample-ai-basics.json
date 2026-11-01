@@ -1,0 +1,36 @@
+{
+  "id": "sample-ai-basics",
+  "title": "Sample: AI Basics",
+  "questions": [
+    {
+      "text": "What does the \"T\" in GPT stand for?",
+      "options": ["Transformer", "Tensor", "Token", "Training"],
+      "correct": 0,
+      "time": 20
+    },
+    {
+      "text": "Which of these is the smallest unit of text an LLM reads?",
+      "options": ["Sentence", "Token", "Paragraph", "Embedding"],
+      "correct": 1,
+      "time": 20
+    },
+    {
+      "text": "An LLM confidently states a fact that is false. What is this usually called?",
+      "options": ["Overfitting", "Drift", "Hallucination", "Bias"],
+      "correct": 2,
+      "time": 20
+    },
+    {
+      "text": "RAG stands for…",
+      "options": ["Recursive Agent Graph", "Retrieval-Augmented Generation", "Reinforced Answer Grading"],
+      "correct": 1,
+      "time": 15
+    },
+    {
+      "text": "Raising the temperature setting of an LLM makes its output…",
+      "options": ["More random", "More accurate", "Shorter", "Faster"],
+      "correct": 0,
+      "time": 20
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Know Signal · Quiz studio</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/common.css">
+<style>
+  body { font-size: 15px; }
+  .layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+  aside { background: var(--bg-2); border-right: 1px solid var(--line); padding: 20px; display: flex; flex-direction: column; gap: 12px; position: sticky; top: 0; height: 100vh; }
+  aside h1 { font-size: .8em; margin: 0 0 6px; color: var(--muted); letter-spacing: .16em; text-transform: uppercase; font-stretch: 112%; }
+  aside a { color: var(--accent-2); text-decoration: none; font-size: .9em; }
+  .qlist { display: flex; flex-direction: column; gap: 6px; overflow: auto; flex: 1; }
+  .qitem { text-align: left; background: transparent; padding: 10px 12px; border-radius: 10px; border: 1px solid transparent; }
+  .qitem:hover { background: var(--surface); }
+  .qitem.sel { background: var(--surface-2); border-color: var(--line); }
+  .qitem small { display: block; color: var(--muted); }
+  main { padding: 28px 40px 120px; max-width: 980px; }
+  .titlebar { display: flex; gap: 12px; align-items: center; margin-bottom: 22px; }
+  .titlebar .input { font-size: 2em; font-weight: 900; font-stretch: 112%; background: transparent; border-color: transparent; padding-left: 4px; }
+  .titlebar .input:hover, .titlebar .input:focus { border-color: var(--line); }
+  .qcard { padding: 18px 20px; margin-bottom: 16px; animation: rise .3s both; }
+  .qcard-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; color: var(--muted); font-weight: 600; }
+  .qcard-head .sp { flex: 1; }
+  .qcard-head button { background: transparent; color: var(--muted); padding: 4px 8px; border-radius: 8px; }
+  .qcard-head button:hover { background: var(--surface-2); color: var(--text); }
+  textarea.input { resize: vertical; min-height: 64px; font-size: 1.1em; font-weight: 600; }
+  .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .optrow { display: flex; align-items: center; gap: 8px; background: var(--bg-2); border: 1.5px solid var(--line); border-left: 6px solid var(--c); border-radius: 12px; padding: 4px 6px 4px 10px; }
+  .optrow.correct { border-color: var(--good); border-left-color: var(--c); background: color-mix(in srgb, var(--good) 14%, var(--bg-2)); }
+  .optrow input[type=text] { flex: 1; background: transparent; border: 0; outline: none; padding: 8px 4px; }
+  .optrow label { display: flex; align-items: center; gap: 4px; font-size: .8em; color: var(--muted); cursor: pointer; white-space: nowrap; }
+  .optrow input[type=radio] { accent-color: var(--good); width: 18px; height: 18px; }
+  .optrow .x { background: transparent; color: var(--muted); padding: 2px 6px; }
+  .qfoot { display: flex; gap: 12px; align-items: center; margin-top: 12px; }
+  .qfoot select { width: auto; padding: 6px 10px; }
+  .savebar { position: fixed; bottom: 0; left: 280px; right: 0; padding: 14px 40px; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(6px); border-top: 1px solid var(--line); display: flex; gap: 10px; align-items: center; }
+  .savebar .sp { flex: 1; }
+  #dirty { color: var(--muted); font-size: .9em; }
+  .empty { color: var(--muted); padding: 60px 0; text-align: center; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div id="elogo" style="font-size:22px;margin-bottom:4px"></div>
+    <h1>Quiz studio</h1>
+    <a href="/host">← Back to host screen</a>
+    <button class="btn small" id="new">+ New quiz</button>
+    <label class="btn ghost small" style="justify-content:center">Import JSON<input type="file" id="import" accept=".json" hidden></label>
+    <div class="qlist" id="list"></div>
+  </aside>
+  <main id="main"><div class="empty">Select a quiz or create a new one.</div></main>
+</div>
+<script src="/static/common.js"></script>
+<script src="/static/edit.js"></script>
+</body>
+</html>
