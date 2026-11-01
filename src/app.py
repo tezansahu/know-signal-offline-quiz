@@ -69,7 +69,26 @@ def open_window(url):
     return subprocess.Popen(args)
 
 
+def wait_until_ready(url, timeout=10):
+    """True once the server answers on the loopback address the window will use."""
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        try:
+            with urllib.request.urlopen(url + "/api/status", timeout=1):
+                return True
+        except Exception:
+            time.sleep(0.2)
+    return False
+
+
+# How long to keep serving after the last host/editor screen disconnects (covers page reloads
+# and moving between the host screen and the editor), and how long to wait for the first one.
+IDLE_GRACE = 15
+FIRST_CONNECT_GRACE = 120
+
+
 def run_app(show_window=True):
+    log.info("starting %s (frozen=%s)", sys.executable, getattr(sys, "frozen", False))
     existing = running_instance()
     if existing:
         log.info("already running at %s; opening another window", existing)
@@ -79,24 +98,51 @@ def run_app(show_window=True):
     import server
     httpd = server.create_server()
     if not httpd:
+        log.error("no free port among 80/8080/8000")
         message_box("Know Signal couldn't start: ports 80, 8080 and 8000 are all busy.\n"
                     "Close other servers and try again.", error=True)
         return 1
     port = httpd.server_address[1]
-    url = "http://localhost" + ("" if port == 80 else f":{port}")
+    # 127.0.0.1, not "localhost": avoids the browser trying IPv6 (::1) where we don't listen.
+    url = "http://127.0.0.1" + ("" if port == 80 else f":{port}")
     log.info("serving on %s (quizzes: %s)", url, server.QUIZ_DIR)
     serving = threading.Thread(target=httpd.serve_forever, daemon=True)
     serving.start()
+    if not wait_until_ready(url):
+        log.error("server did not answer on %s", url)
+        message_box(f"Know Signal started but isn't reachable at {url}.\n"
+                    "Security software may be blocking it. Details:\n" +
+                    os.path.join(STATE_DIR, "knowsignal.log"), error=True)
+        httpd.shutdown()
+        return 1
 
-    window = open_window(url + "/host") if show_window else None
-    if window is None:
-        # Plain browser fallback (or --no-window): serve until the host presses Quit on the setup screen.
+    if not show_window:
         serving.join()
         return 0
-    # A dedicated Edge profile keeps this process alive exactly as long as the window is open.
-    while window.poll() is None and serving.is_alive():
-        time.sleep(0.5)
-    log.info("window closed; shutting down")
+    window = open_window(url + "/host")
+    log.info("window launched (%s)", "edge pid %s" % window.pid if window else "default browser")
+
+    # Lifetime follows the host screen's live connection, not the browser process: Edge may hand
+    # the window to another process (first-run relaunch, startup boost, policies), so its PID is
+    # not a reliable "window is open" signal.
+    started, seen, idle_since = time.time(), False, None
+    while serving.is_alive():
+        time.sleep(1)
+        if window is not None and window.poll() is not None and not seen:
+            log.info("edge launcher exited with %s before the page connected", window.returncode)
+            window = None
+        if server.HUB.hosts:
+            seen, idle_since = True, None
+            continue
+        if not seen:
+            if time.time() - started > FIRST_CONNECT_GRACE:
+                log.warning("no host screen connected within %ss; shutting down", FIRST_CONNECT_GRACE)
+                break
+            continue
+        idle_since = idle_since or time.time()
+        if time.time() - idle_since > IDLE_GRACE:
+            log.info("host screen closed; shutting down")
+            break
     httpd.shutdown()
     return 0
 

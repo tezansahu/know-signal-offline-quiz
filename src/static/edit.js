@@ -1,5 +1,7 @@
 // Quiz editor (host laptop only).
 $("#elogo").innerHTML = logo();
+// Holding the host channel open tells the desktop app this window is still in use.
+liveStream(() => "/api/host/events", () => {});
 const main = $("#main");
 let quiz = null;
 let dirty = false;
